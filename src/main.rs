@@ -22,10 +22,9 @@ struct Handler;
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Command(command) = interaction {
-            println!("Recieved command interaction: {command:#?}");
-
             let content = match command.data.name.as_str() {
                 "ping" => Some(commands::ping::run(&command.data.options())),
+                "code" => Some(commands::code::run(&command.data.options())),
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -45,10 +44,15 @@ impl EventHandler for Handler {
         let guild_id = GuildId::new(858572001907572768); // TODO: hardcoded guild id -- fix this?
 
         let commands = guild_id
-            .set_commands(&ctx.http, vec![commands::ping::register()])
+            .set_commands(
+                &ctx.http,
+                vec![commands::ping::register(), commands::code::register()],
+            )
             .await;
 
-        println!("I now have the following guild slash commands: {commands:#?}");
+        if commands.is_err() {
+            println!("fuck");
+        }
     }
 }
 
