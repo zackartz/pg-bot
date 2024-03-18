@@ -11,6 +11,13 @@ use serenity::{
 
 struct Handler;
 
+/**
+ * General idea for flow
+ *
+ * User Joins -> Bot DMs -> user solves with either /solve <code> or just !solve ```<optional
+ * language> <code>``` -> solution is either accepted or denied -> role assigned (or not)
+ */
+
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
@@ -35,7 +42,7 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
 
-        let guild_id = GuildId::new(858572001907572768);
+        let guild_id = GuildId::new(858572001907572768); // TODO: hardcoded guild id -- fix this?
 
         let commands = guild_id
             .set_commands(&ctx.http, vec![commands::ping::register()])
