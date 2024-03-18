@@ -1,22 +1,62 @@
-use clap::Parser;
+mod commands;
 
-#[derive(Parser, Debug)]
-#[clap(author = "Sridhar Ratnakumar", version, about)]
-/// Application configuration
-struct Args {
-    /// whether to be verbose
-    #[arg(short = 'v')]
-    verbose: bool,
+use std::env;
 
-    /// an optional name to greet
-    #[arg()]
-    name: Option<String>,
+use serenity::{
+    all::{CreateInteractionResponse, CreateInteractionResponseMessage, GuildId, Ready},
+    async_trait,
+    model::application::Interaction,
+    prelude::*,
+};
+
+struct Handler;
+
+#[async_trait]
+impl EventHandler for Handler {
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::Command(command) = interaction {
+            println!("Recieved command interaction: {command:#?}");
+
+            let content = match command.data.name.as_str() {
+                "ping" => Some(commands::ping::run(&command.data.options())),
+                _ => Some("not implemented :(".to_string()),
+            };
+
+            if let Some(content) = content {
+                let data = CreateInteractionResponseMessage::new().content(content);
+                let builder = CreateInteractionResponse::Message(data);
+                if let Err(why) = command.create_response(&ctx.http, builder).await {
+                    println!("Cannot respond to slash command: {why}");
+                }
+            };
+        }
+    }
+
+    async fn ready(&self, ctx: Context, ready: Ready) {
+        println!("{} is connected!", ready.user.name);
+
+        let guild_id = GuildId::new(858572001907572768);
+
+        let commands = guild_id
+            .set_commands(&ctx.http, vec![commands::ping::register()])
+            .await;
+
+        println!("I now have the following guild slash commands: {commands:#?}");
+    }
 }
 
-fn main() {
-    let args = Args::parse();
-    if args.verbose {
-        println!("DEBUG {args:?}");
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().expect("dotenvy to find token");
+
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+
+    let mut client = Client::builder(token, GatewayIntents::empty())
+        .event_handler(Handler)
+        .await
+        .expect("Error creating client");
+
+    if let Err(why) = client.start().await {
+        println!("Client error: {}", why);
     }
-    println!("Hello {}!", args.name.unwrap_or("world".to_string()));
 }

@@ -44,11 +44,10 @@
 
               echo
               echo "🍎🍎 Run 'just <recipe>' to get started"
-              just
+              docker compose up -d
             '';
             buildInputs = nonRustDeps;
             nativeBuildInputs = with pkgs; [
-              just
               rust-toolchain
             ];
             RUST_BACKTRACE = 1;

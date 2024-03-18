@@ -1,11 +1,14 @@
 [package]
-authors = ["Sridhar Ratnakumar <srid@srid.ca>"]
+authors = ["Zachary Myers <zackmyers@lavabit.com>"]
 edition = "2021"
 # If you change the name here, you must also do it in flake.nix (and run `cargo generate-lockfile` afterwards)
-name = "rust-nix-template"
+name = "pg-bot"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "4.3.14", features = ["derive"] }
+serenity = { version = "0.12.1", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "collector"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+dotenvy = "0.15.7"
+sqlx = { version = "0.7.4", features = [ "runtime-tokio", "tls-rustls" ] }
