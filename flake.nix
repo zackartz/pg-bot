@@ -42,12 +42,10 @@
               # For rust-analyzer 'hover' tooltips to work.
               export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
 
-              echo
-              echo "🍎🍎 Run 'just <recipe>' to get started"
               docker compose up -d
             '';
             buildInputs = nonRustDeps;
-            nativeBuildInputs = with pkgs; [
+            nativeBuildInputs = [
               rust-toolchain
             ];
             RUST_BACKTRACE = 1;

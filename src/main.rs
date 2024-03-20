@@ -20,6 +20,23 @@ struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
+    async fn ready(&self, ctx: Context, ready: Ready) {
+        println!("{} is connected!", ready.user.name);
+
+        let guild_id = GuildId::new(858572001907572768); // TODO: hardcoded guild id -- fix this?
+
+        let commands = guild_id
+            .set_commands(
+                &ctx.http,
+                vec![commands::ping::register(), commands::code::register()],
+            )
+            .await;
+
+        if commands.is_err() {
+            println!("fuck");
+        }
+    }
+
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Command(command) = interaction {
             let content = match command.data.name.as_str() {
@@ -35,23 +52,6 @@ impl EventHandler for Handler {
                     println!("Cannot respond to slash command: {why}");
                 }
             };
-        }
-    }
-
-    async fn ready(&self, ctx: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
-
-        let guild_id = GuildId::new(858572001907572768); // TODO: hardcoded guild id -- fix this?
-
-        let commands = guild_id
-            .set_commands(
-                &ctx.http,
-                vec![commands::ping::register(), commands::code::register()],
-            )
-            .await;
-
-        if commands.is_err() {
-            println!("fuck");
         }
     }
 }
